@@ -2,26 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Healthcare AI – Medical Image Analysis</title>
+  <title>Healthcare AI - Medical Image Analysis</title>
 
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-gray-900 to-black min-h-screen flex items-center justify-center p-4">
 
   <div class="bg-white shadow-2xl rounded-2xl p-6 w-full max-w-2xl">
 
-    <!-- Header -->
-    <h1 class="text-3xl font-extrabold text-center text-blue-700 mb-2">
-      🏥 Healthcare AI
+    <h1 class="text-3xl font-extrabold text-center text-black mb-2">
+       Healthcare AI
     </h1>
     <p class="text-center text-gray-600 mb-6">
       Upload a medical image and receive AI-assisted analysis instantly.
     </p>
 
-    <!-- Upload Section -->
-    <div class="border-2 border-dashed border-blue-300 rounded-xl p-4 text-center mb-4">
+    <div class="border-2 border-dashed border-gray-400 rounded-xl p-4 text-center mb-4">
       <input
         type="file"
         id="imageInput"
@@ -31,69 +28,53 @@
                file:mr-4 file:py-2 file:px-4
                file:rounded-full file:border-0
                file:text-sm file:font-semibold
-               file:bg-blue-100 file:text-blue-700
-               hover:file:bg-blue-200"
+               file:bg-gray-200 file:text-black
+               hover:file:bg-gray-300"
       />
       <p class="text-xs text-gray-500 mt-2">
         Supported: MRI, X-ray, Histopathology, Skin images
       </p>
     </div>
 
-    <!-- Image Preview -->
     <div id="previewContainer" class="hidden mb-4">
-      <p class="text-sm font-semibold text-gray-700 mb-2">🖼 Uploaded Image</p>
-      <img id="previewImage" class="w-full max-h-64 object-contain rounded-lg border" />
+      <p class="text-sm font-semibold text-gray-700 mb-2">  Uploaded Image</p>
+      <img id="previewImage" class="w-full max-h-64 object-contain rounded-lg border border-gray-300" />
     </div>
 
-    <!-- Button -->
     <button
       onclick="analyzeImage()"
-      class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition"
+      class="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-xl font-semibold transition"
     >
-      🔍 Analyze Image
+      Analyze Image
     </button>
 
-    <!-- Loading -->
-    <div id="loading" class="hidden text-center text-blue-700 font-semibold mt-4 animate-pulse">
+    <div id="loading" class="hidden text-center text-black font-semibold mt-4 animate-pulse">
       Analyzing image, please wait...
     </div>
 
-    <!-- Result -->
     <div id="result" class="hidden mt-6 space-y-4">
 
-      <!-- Modality -->
-      <div class="bg-green-50 border border-green-300 rounded-lg p-4">
-        <p class="text-sm text-green-800">
+      <div class="bg-gray-100 border border-gray-300 rounded-lg p-4">
+        <p class="text-sm text-gray-800">
           <strong>Detected Image Type:</strong>
           <span id="imageType" class="font-semibold"></span>
         </p>
       </div>
 
-      <!-- Disease -->
-      <div class="bg-blue-50 border border-blue-300 rounded-lg p-4">
-        <p id="disease" class="text-xl font-bold text-blue-800"></p>
-        <p id="confidence" class="text-sm text-blue-700 mb-2"></p>
+      <div class="bg-gray-50 border border-gray-300 rounded-lg p-4">
+        <p id="disease" class="text-xl font-bold text-black"></p>
+        <p id="confidence" class="text-sm text-gray-700 mb-2"></p>
 
-        <!-- Confidence Bar -->
-        <div class="w-full bg-blue-200 rounded-full h-3">
-          <div id="confidenceBar" class="bg-blue-600 h-3 rounded-full transition-all"></div>
+        <div class="w-full bg-gray-300 rounded-full h-3">
+          <div id="confidenceBar" class="bg-black h-3 rounded-full transition-all"></div>
         </div>
       </div>
 
-      <!-- Explanation -->
-      <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-        <p class="text-sm text-yellow-900">
-          <strong>🧠 What this means:</strong><br />
-          <span id="explanation">
-            This result shows the AI’s best prediction based on visual patterns.
-          </span>
-        </p>
-      </div>
+    
 
-      <!-- All Probabilities -->
       <details class="text-sm">
         <summary class="cursor-pointer font-semibold text-gray-700">
-          📊 View all probabilities
+          View all probabilities
         </summary>
         <pre
           id="allProbs"
@@ -101,19 +82,13 @@
         ></pre>
       </details>
 
-      <!-- Disclaimer -->
-      <p class="text-xs text-gray-500 mt-2 text-center">
-        ⚠️ This AI result is for informational purposes only and is not a medical diagnosis.
-        Always consult a certified doctor.
-      </p>
+      
 
     </div>
   </div>
 
-  <!-- Frontend Logic -->
   <script src="app.js"></script>
 
-  <!-- Preview Script -->
   <script>
     function previewImage(event) {
       const img = document.getElementById("previewImage");
