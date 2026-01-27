@@ -1,16 +1,17 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-import tensorflow as tf
-import keras
-import numpy as np
 from PIL import Image
-import json
+import io
 
-# -----------------------------
-# APP SETUP
-# -----------------------------
-app = FastAPI(title="Healthcare AI – Multi Disease Detection")
+from gemini.modality_detector import detect_modality
+from services.predictor import init_models, predict
 
+
+app = FastAPI(title="Healthcare AI – Hybrid Model")
+
+# ----------------------------------------
+# CORS (allow frontend access)
+# ----------------------------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,54 +19,50 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -----------------------------
-# LOAD LABELS
-# -----------------------------
-with open("labels.json", "r") as f:
-    LABELS = json.load(f)
+# ----------------------------------------
+# Load models at startup
+# ----------------------------------------
+@app.on_event("startup")
+def startup():
+    init_models()
 
-# -----------------------------
-# LOAD MODEL (KERAS 3 SAFE)
-# -----------------------------
-MODEL_PATH = "model/saved_model"
 
-model = keras.layers.TFSMLayer(
-    MODEL_PATH,
-    call_endpoint="serving_default"
-)
-
-# Wrap as callable model
-def predict_fn(inputs):
-    outputs = model(inputs)
-    # SavedModel returns dict: get first value
-    return list(outputs.values())[0]
-
-# -----------------------------
-# IMAGE PREPROCESSING
-# -----------------------------
-def preprocess_image(image: Image.Image):
-    image = image.resize((224, 224))
-    arr = np.array(image) / 255.0
-    arr = np.expand_dims(arr, axis=0)
-    return arr
-
-# -----------------------------
-# API ENDPOINT
-# -----------------------------
+# ----------------------------------------
+# Analyze endpoint
+# ----------------------------------------
 @app.post("/analyze")
-async def analyze_image(file: UploadFile = File(...)):
-    image = Image.open(file.file).convert("RGB")
-    input_tensor = preprocess_image(image)
+async def analyze(file: UploadFile = File(...)):
+    image_bytes = await file.read()
 
-    preds = predict_fn(input_tensor)[0]
-    idx = int(np.argmax(preds))
+    # Validate image
+    try:
+        Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    except Exception:
+        return {
+            "status": "error",
+            "message": "Invalid image file"
+        }
+
+    # Step 1: Detect modality via Gemini
+    modality = detect_modality(image_bytes)
+
+    if modality == "unknown":
+        return {
+            "status": "error",
+            "message": "Unable to detect medical image type"
+        }
+
+    # Step 2: CNN prediction (bytes → preprocess inside predictor)
+    result = predict(modality, image_bytes)
 
     return {
         "status": "success",
-        "detected_disease": LABELS[idx],
-        "confidence": round(float(preds[idx]) * 100, 2),
-        "all_probabilities": {
-            LABELS[i]: round(float(preds[i]) * 100, 2)
-            for i in range(len(LABELS))
-        }
+        "detected_image_type": modality,
+        "detected_disease": result["detected_disease"],
+        "confidence": result["confidence"],
+        "all_probabilities": result["all_probabilities"],
+        "medical_note": (
+            "This AI analysis is for assistance only and "
+            "is not a medical diagnosis. Please consult a doctor."
+        )
     }
