@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Healthcare AI Diagnosis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen flex items-center justify-center">
+
+<div class="bg-white p-6 rounded-xl shadow-xl w-[440px]">
+  <h1 class="text-xl font-bold text-center text-blue-700">
+    🏥 Healthcare AI Diagnosis
+  </h1>
+
+  <p class="text-center text-gray-500 mb-4">
+    Brain • Cancer • Chest • Eye • Bone
+  </p>
+
+  <input
+    type="file"
+    id="fileInput"
+    class="w-full mb-4 p-2 border rounded"
+    accept="image/*"
+  />
+
+  <button
+    onclick="analyzeImage()"
+    class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+  >
+    Analyze Medical Image
+  </button>
+
+  <pre
+    id="output"
+    class="mt-4 bg-gray-100 p-3 rounded text-sm overflow-auto h-48"
+  ></pre>
+</div>
+
+<script>
+async function analyzeImage() {
+  const fileInput = document.getElementById("fileInput");
+  const output = document.getElementById("output");
+
+  if (!fileInput.files.length) {
+    alert("Please upload a medical image");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  output.textContent = "Analyzing...";
+
+  try {
+    const response = await fetch("http://localhost:8000/analyze", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+    output.textContent = JSON.stringify(data, null, 2);
+
+  } catch (error) {
+    output.textContent = "❌ Error connecting to backend";
+  }
+}
+</script>
+
+</body>
+</html>
+echo "# healthcare" >> README.md
+git init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/Shivukumar-M/healthcare.git
+git push -u origin main
