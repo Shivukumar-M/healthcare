@@ -1,67 +1,53 @@
+import base64
 import google.generativeai as genai
 from config import GEMINI_API_KEY, GEMINI_MODEL
 
 genai.configure(api_key=GEMINI_API_KEY)
-
 MODEL = genai.GenerativeModel(GEMINI_MODEL)
 
 
 def detect_modality(image_bytes: bytes) -> str:
-    """
-    Detects the medical image modality using Gemini.
-
-    Returns one of:
-    - "brain"
-    - "breast"
-    - "chest"
-    - "skin"
-    - "unknown"
-    """
-
     prompt = """
 You are a medical imaging classifier.
 
-Given ONE medical image, classify it into EXACTLY ONE of the following categories:
-
+Classify the image into EXACTLY one:
 - brain_mri
 - breast_histopathology
 - chest_xray
 - skin_image
 
 Rules:
-- Return ONLY the category name.
-- Do NOT explain.
-- Do NOT add extra text.
-- If unsure, return "unknown".
+- Return ONLY the category name
+- No explanation
+- If unsure return "unknown"
 """
 
     try:
-        response = MODEL.generate_content(
-            [
-                prompt,
-                {
-                    "mime_type": "image/jpeg",
-                    "data": image_bytes
-                }
-            ]
-        )
+        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
-        if not response.text:
+        response = MODEL.generate_content([
+            prompt,
+            {
+                "mime_type": "image/jpeg",
+                "data": image_b64
+            }
+        ])
+
+        if not response or not response.text:
+            print("Gemini returned empty response")
             return "unknown"
 
         result = response.text.strip().lower()
 
-        if result == "brain_mri":
-            return "brain"
-        if result == "breast_histopathology":
-            return "breast"
-        if result == "chest_xray":
-            return "chest"
-        if result == "skin_image":
-            return "skin"
+        mapping = {
+            "brain_mri": "brain",
+            "breast_histopathology": "breast",
+            "chest_xray": "chest",
+            "skin_image": "skin"
+        }
 
-        return "unknown"
+        return mapping.get(result, "unknown")
 
     except Exception as e:
-        print("Gemini modality detection error:", str(e))
+        print("Gemini modality detection error:", e)
         return "unknown"

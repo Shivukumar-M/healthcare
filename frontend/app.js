@@ -37,8 +37,17 @@ async function analyzeImage() {
     document.getElementById("confidence").innerText =
       "Confidence: " + data.confidence + "%";
 
+    // confidence bar
+    document.getElementById("confidenceBar").style.width =
+      Math.min(data.confidence, 100) + "%";
+
+    // probabilities
     document.getElementById("allProbs").innerText =
       JSON.stringify(data.all_probabilities, null, 2);
+
+    // ✅ AI EXPLANATION (THIS WAS MISSING / BROKEN)
+    document.getElementById("aiExplanation").innerText =
+      data.ai_explanation || "No explanation available.";
 
     loading.classList.add("hidden");
     result.classList.remove("hidden");
